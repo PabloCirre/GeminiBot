@@ -54,10 +54,10 @@ let activeCronJobs = {}; // maps agent id to cron task
 
 // Cron Mapping Dict
 const CRON_LABELS = {
-    '* * * * *': 'Cada Minuto (Test)',
-    '0 * * * *': 'Cada Hora',
-    '0 9 * * *': 'Cada Día (9:00 AM)',
-    '0 3 * * *': 'Cada Noche (3:00 AM)'
+    '* * * * *': 'Every Minute (Test)',
+    '0 * * * *': 'Every Hour',
+    '0 9 * * *': 'Daily (9:00 AM)',
+    '0 3 * * *': 'Nightly (3:00 AM)'
 };
 
 // 1. Initialization
@@ -171,17 +171,17 @@ async function fetchModels(savedModelName) {
             
             let displayName = m.displayName || cleanName;
             let icon = '';
-            let desc = 'Modelo de propósito general.';
+            let desc = 'General purpose AI model.';
 
             if (cleanName.includes('pro')) {
                 card.classList.add('pro-model');
-                icon = '✨';
-                desc = 'Razonamiento complejo. Ideal para leer múltiples archivos de código.';
+                icon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; color: #D4AF37;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+                desc = 'Complex reasoning. Perfect for multi-file code audits.';
                 if (!proModelFallback) proModelFallback = cleanName;
             } else if (cleanName.includes('flash')) {
                 card.classList.add('flash-model');
-                icon = '⚡';
-                desc = 'Respuestas a la velocidad de la luz para consultas rápidas.';
+                icon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; color: #00BFFF;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>';
+                desc = 'Lightning fast responses for quick queries.';
             }
 
             card.innerHTML = `
@@ -365,7 +365,7 @@ function resetAgentForm() {
     agentFolderPathHidden.value = '';
     agentFolderDisplay.innerText = '';
     editingAgentIdInput.value = '';
-    addAgentBtn.innerText = '➕ Create Agent';
+    addAgentBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></svg> Create Agent';
     cancelEditBtn.style.display = 'none';
 }
 
@@ -427,21 +427,33 @@ function renderAgents() {
         if (agent.lastOutput) {
             viewOutputHtml = `
             <div class="agent-actions" style="margin-top: 0;">
-                <button class="agent-btn view view-btn" data-id="${agent.id}">📄 Ver Resultado</button>
+                <button class="agent-btn view view-btn" data-id="${agent.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    View Result
+                </button>
             </div>`;
         }
         
         card.innerHTML = `
             <div class="agent-header">
-                <span class="agent-name">🤖 ${agent.name}</span>
-                <span class="agent-cron">🕒 ${friendlyCron}</span>
+                <span class="agent-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>${agent.name}</span>
+                <span class="agent-cron">${friendlyCron}</span>
             </div>
             <div class="agent-folder">Context: ...${agent.folder.slice(-25)}</div>
             ${viewOutputHtml}
             <div class="agent-actions">
-                <button class="agent-btn run run-btn" data-id="${agent.id}" id="run-btn-${agent.id}">▶️ Ejecutar</button>
-                <button class="agent-btn edit edit-btn" data-id="${agent.id}">✏️ Editar</button>
-                <button class="agent-btn danger del-btn" data-id="${agent.id}">🗑️ Borrar</button>
+                <button class="agent-btn run run-btn" data-id="${agent.id}" id="run-btn-${agent.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Run
+                </button>
+                <button class="agent-btn edit edit-btn" data-id="${agent.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    Edit
+                </button>
+                <button class="agent-btn danger del-btn" data-id="${agent.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    Delete
+                </button>
             </div>
         `;
         agentsList.appendChild(card);
@@ -521,18 +533,18 @@ function scheduleAllAgents() {
 
 async function executeAgentJob(agent) {
     if (!accessToken) {
-        new Notification("Antigravity Agent Failed", { body: `Agent '${agent.name}' failed to run: You are not logged in.`});
+        new Notification("GeminiBot Agent Failed", { body: `Agent '${agent.name}' failed to run: You are not logged in.`});
         return;
     }
 
     const runBtn = document.getElementById(`run-btn-${agent.id}`);
     if (runBtn) {
-        runBtn.innerHTML = '⏳ Pensando...';
+        runBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin" style="margin-right: 4px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Thinking...';
         runBtn.disabled = true;
     }
 
     console.log(`[Agents] Executing job for ${agent.name} targeting ${agent.folder}`);
-    new Notification("Antigravity Agent Running", { body: `Agent '${agent.name}' has woken up and is processing files...`});
+    new Notification("GeminiBot Agent Running", { body: `Agent '${agent.name}' has woken up and is processing files...`});
     
     try {
         const memoryPath = path.join(agent.folder, `.agent_memory_${agent.id}.txt`);
@@ -553,10 +565,10 @@ async function executeAgentJob(agent) {
         }
 
         // Strict Memory Constraint
-        sysPrompt += "\n\n# INSTRUCCIÓN OBLIGATORIA DE MEMORIA:\nAl final de tu respuesta, DEBES incluir un bloque envolviendo tu progreso para tu yo del futuro, usando exactamente estas etiquetas HTML:\n<AGENT_MEMORY>\n(Escribe aquí tu estado, qué has hecho y qué debes hacer la próxima vez que te despiertes)\n</AGENT_MEMORY>\nEsto es vital para mantener tu continuidad.";
+        sysPrompt += "\n\n# MANDATORY MEMORY INSTRUCTION:\nAt the end of your response, you MUST include a block wrapping your progress for your future self, using exactly these HTML tags:\n<AGENT_MEMORY>\n(Write here your state, what you have done and what you should do next time you wake up)\n</AGENT_MEMORY>\nThis is vital for maintaining your continuity.";
 
         const payload = {
-            contents: [{ role: 'user', parts: [{ text: "Despierta. Revisa tus instrucciones de sistema, tu memoria y el código local, y cumple con tu tarea." }] }],
+            contents: [{ role: 'user', parts: [{ text: "Wake up. Review your system instructions, memory, and local code, and fulfill your task." }] }],
             systemInstruction: { parts: [{ text: sysPrompt }] }
         };
 
@@ -592,14 +604,14 @@ async function executeAgentJob(agent) {
             localStorage.setItem('antigravity_agents', JSON.stringify(savedAgents));
             renderAgents();
             
-            new Notification("Antigravity Agent Completed", { body: `Report: ${fileName} ${memoryMatch ? '(Memory Updated)' : ''}`});
+            new Notification("GeminiBot Agent Completed", { body: `Report: ${fileName} ${memoryMatch ? '(Memory Updated)' : ''}`});
         }
     } catch (error) {
         console.error(`Agent ${agent.name} Error:`, error);
-        new Notification(`Antigravity Agent Error`, { body: `Agent '${agent.name}' encountered an error: ${error.message}`});
+        new Notification(`GeminiBot Agent Error`, { body: `Agent '${agent.name}' encountered an error: ${error.message}`});
         
         if (runBtn) {
-            runBtn.innerHTML = '▶️ Ejecutar';
+            runBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run';
             runBtn.disabled = false;
         }
     }

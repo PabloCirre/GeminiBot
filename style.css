@@ -1,13 +1,13 @@
 :root {
-  --bg-base: rgba(18, 18, 22, 0.95);
-  --surface-base: rgba(255, 255, 255, 0.05);
-  --border: rgba(255, 255, 255, 0.1);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.6);
-  --accent: #5D3FD3; /* Deep Purple */
-  --accent-glow: rgba(93, 63, 211, 0.4);
-  --user-bg: rgba(93, 63, 211, 0.2);
-  --bot-bg: rgba(255, 255, 255, 0.08);
+  --bg-base: rgba(10, 10, 12, 0.98);
+  --surface-base: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.08);
+  --text-primary: #e0e0e0;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --accent: #4FD1C5; /* Teal/Cyan Pro */
+  --accent-glow: rgba(79, 209, 197, 0.2);
+  --user-bg: rgba(79, 209, 197, 0.1);
+  --bot-bg: rgba(255, 255, 255, 0.05);
 }
 
 html, body {
@@ -61,14 +61,18 @@ html, body {
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s, color 0.2s;
-  padding: 4px;
+  transition: all 0.2s ease;
+  padding: 6px;
+  border-radius: 6px;
 }
 .icon-btn:hover {
-  color: var(--text-primary);
-  transform: scale(1.1);
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
 }
 
 /* Settings Panel */
@@ -423,10 +427,19 @@ input:focus, select:focus, textarea:focus {
 }
 .agent-btn:hover { background: rgba(255,255,255,0.1); }
 .agent-btn.danger { color: #ff5252; border-color: rgba(255, 82, 82, 0.3); }
-.agent-btn.danger:hover { background: rgba(255, 82, 82, 0.1); }
-.agent-btn.run { color: #4CAF50; border-color: rgba(76, 175, 80, 0.3); }
-.agent-btn.run:hover { background: rgba(76, 175, 80, 0.1); }
-.agent-btn.edit { color: #FFC107; border-color: rgba(255, 193, 7, 0.3); }
-.agent-btn.edit:hover { background: rgba(255, 193, 7, 0.1); }
-.agent-btn.view { color: #00BFFF; border-color: rgba(0, 191, 255, 0.3); font-weight: bold; width: 100%; border-top-left-radius: 0; border-top-right-radius: 0;}
-.agent-btn.view:hover { background: rgba(0, 191, 255, 0.1); }
+.agent-btn.view { color: var(--accent); border-color: var(--accent-glow); font-weight: 600; width: 100%; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;}
+.agent-btn.view:hover { background: var(--user-bg); }
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+svg {
+  display: inline-block;
+  vertical-align: middle;
+}
