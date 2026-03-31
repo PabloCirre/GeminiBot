@@ -41,9 +41,11 @@ Esto confiere la capacidad de que un solo Script iterativo pueda re-escribir, te
 
 ---
 
-## Instalación & Deploy
+## Instalación & Deploy (Multi-Plataforma)
+
+Al estar construido sobre Electron de forma encapsulada y hacer uso exclusivo de `path.join` estandarizado, **GeminiBot es 100% compatible nativo tanto con macOS como con Microsoft Windows y distribuciones Linux.**
 
 Requiere NodeJS configurado localmente.
-1. Haz un clon del código fuente.
+1. Haz un clon del código fuente (`git clone https://github.com/PabloCirre/GeminiBot.git`)
 2. Instala dependencias (`npm install electron node-cron electron-store`).
-3. Lánzalo ejecutando (`npm start`). *Aparecerá junto a tus utilidades del MenuBar pero abriendo en pantalla completa los dominios de la ventana principal.*
+3. Lánzalo ejecutando (`npm start`). *Aparecerá una ventana autónoma que interactúa directamente sin marcos y en modo escritorio.*
