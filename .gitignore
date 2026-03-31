@@ -1,0 +1,19 @@
+node_modules/
+.env
+
+# MacOS files
+.DS_Store
+
+# Electron build artifacts
+dist/
+build/
+out/
+*.log
+
+# Agent local memories & generated files
+.agent_memory_*.txt
+AgentReport_*.md
+
+# Editor Configs
+.idea/
+.vscode/
