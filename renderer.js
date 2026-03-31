@@ -14,6 +14,7 @@ const closeAppBtn = document.getElementById('close-app');
 const settingsPanel = document.getElementById('settings-panel');
 const agentsPanel = document.getElementById('agents-panel');
 const saveSettingsBtn = document.getElementById('save-settings');
+const initDemoBtn = document.getElementById('init-demo');
 
 // Auth & Configuration
 const clientIdInput = document.getElementById('client-id');
@@ -126,9 +127,35 @@ selectFolderBtn.addEventListener('click', async () => {
     const folderPath = await ipcRenderer.invoke('open-directory-dialog');
     if (folderPath) {
         localContextPath = folderPath;
-        localStorage.setItem('local_context_path', folderPath);
+        localStorage.setItem('local_context_path', localContextPath);
         selectedFolderDisplay.innerText = "Context: " + folderPath;
     }
+});
+
+// Demo Agent Initialization
+initDemoBtn.addEventListener('click', () => {
+    const existing = savedAgents.find(a => a.name === "UX Auditor");
+    if (existing) {
+        alert("Demo Agent 'UX Auditor' already exists in your list.");
+        return;
+    }
+
+    const demoAgent = {
+        id: 'agent_demo_' + Date.now(),
+        name: "UX Auditor",
+        group: "Quality Assurance",
+        cron: "0 9 * * *", // Daily 9am
+        folder: localContextPath || process.cwd(),
+        prompt: "Analyze the current UI files (index.html, style.css, renderer.js) for usability issues and propose shell commands to improve it. Use your specialized USABILITY_FRAMEWORK skill.",
+        lastOutput: null
+    };
+
+    savedAgents.push(demoAgent);
+    localStorage.setItem('antigravity_agents', JSON.stringify(savedAgents));
+    renderAgents();
+    scheduleAllAgents();
+    
+    new Notification("Demo Initialized", { body: "'UX Auditor' added to Quality Assurance group." });
 });
 
 agentFolderBtn.addEventListener('click', async () => {
