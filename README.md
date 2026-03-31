@@ -1,87 +1,72 @@
-# 🤖 GeminiBot: Autonomous Agent Framework
+# 🤖 GeminiBot: Professional Autonomous AI Framework
 
-GeminiBot is a professional, high-performance desktop application built with Electron. It serves as a sophisticated orchestration layer for Google's Gemini 2.0 models, enabling both real-time AI assistance and long-running autonomous coding agents with persistent cross-session memory.
-
----
-
-## 🌟 Core Features
-
-### 1. 🧠 Multi-File Codebase Context
-GeminiBot can ingest entire project directories. By selecting a local folder, the application recursively scrapes your codebase (respecting `.gitignore` conventions), providing the LLM with a 1:1 map of your project for debugging, refactoring, or auditing.
-
-### 2. 🔐 Native OAuth 2.0 Flow
-Forget manual API key pasting. GeminiBot implements a full, secure OAuth 2.0 flow:
-- **Local Proxy Server:** Spawns a temporary NodeJS bridge to handle the Google Cloud handshake.
-- **Persistent Sessions:** Automatically manages and refreshes access tokens using encrypted local storage.
-- **Cloud Console Integration:** Designed to work directly with your Google Cloud "Generative Language API" projects.
-
-### 3. 🤖 Autonomous Agents (Codex-Style)
-The crown jewel of GeminiBot is its background agent engine powered by `node-cron`:
-- **Scheduled Tasks:** Create agents that wake up on a specific schedule (e.g., nightly at 3 AM) to perform recurring codebase audits.
-- **Continuous Memory (`<AGENT_MEMORY>`):** Agents use a specialized tagging system to write their progress to disk. When an agent wakes up for its next shift, it automatically "remembers" exactly where it left off by reading its previous state.
-- **MD Reporting:** Every agent execution generates a clean, readable Markdown report within the target project folder.
+GeminiBot is a desktop application (macOS/Windows) for building and managing **Autonomous AI Agents** powered by the Gemini 2.0 Pro/Flash models. It combines zero-drift persistence, local file system context, and a secure shell action bridge.
 
 ---
 
-## 📁 Project Structure
+## ⚡ Key Features
 
-```text
-GeminiBot/
-├── assets/             # Branding, Icons, and Tray templates
-├── main.js             # Electron Main Process (Window & IPC)
-├── renderer.js         # UI Logic & Agent Orchestration
-├── oauth.js            # OAuth 2.0 Server & Token Management
-├── index.html          # Professional Glassmorphism UI
-├── style.css           # Modern Dark-Mode Aesthetics
-└── package.json        # Dependencies & Build metadata
+- **Autonomous Proactive Reasoning**: Agents scan their local environment and propose actions (Moltbot pattern).
+- **Secure Shell Bridge**: Review and execute terminal commands proposed by your agents.
+- **Multimodal Persistence**: Agents maintain memory across sessions using `.agent_memory` files.
+- **Skill-Based Plug-and-Play**: Inject specialized logic into any agent via the `/skills` directory or `skills.md`.
+- **Professional UI/UX**: High-performance dark glassmorphism interface with SVG iconography.
+- **Privacy First**: All tokens, memory, and logs reside locally on your machine.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Download & Install
+Check the **[GitHub Releases](https://github.com/PabloCirre/GeminiBot/releases)** for the latest standalone binaries:
+- **macOS:** `GeminiBot-1.1.0-arm64.dmg`
+- **Windows:** `GeminiBot Setup 1.1.0.exe`
+
+### 2. Configure OAuth 2.0
+GeminiBot uses the secure Google Cloud OAuth 2.0 flow. 
+- Input your **Client ID** and **Client Secret**.
+- Click **"Login with Google"**.
+- Your tokens are stored securely in `localStorage`.
+
+---
+
+## 🛠️ Developer Setup (Building from Source)
+
+If you wish to modify or build GeminiBot yourself:
+
+```bash
+# Clone the repository
+git clone https://github.com/PabloCirre/GeminiBot.git
+
+# Install dependencies
+npm install
+
+# Start in developer mode
+npm start
+
+# Generate standard binaries
+bash scripts/generate_icns.sh
+npm run build:mac   # For macOS
+npm run build:win   # For Windows
 ```
 
 ---
 
-## 🛠️ Getting Started
+## 📂 Project Architecture
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (LTS recommended)
-- A Google Cloud Project with the **Generative Language API** enabled.
-- OAuth 2.0 Client ID and Client Secret (Desktop App type).
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/PabloCirre/GeminiBot.git
-   cd GeminiBot
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Launch the application:
-   ```bash
-   npm start
-   ```
-
-### Configuration
-1. Open the **Settings (Gear Icon)**.
-2. Enter your Google Cloud **Client ID** and **Client Secret**.
-3. Click **Login with Google**. A browser tab will open for authentication.
-4. Once authenticated, select your preferred model (e.g., `gemini-1.5-pro`) and start chatting or creating agents.
+- `/assets`: Brand icons and UI templates.
+- `/skills`: Global or local specialized instructions for bots.
+- `main.js`: Electron Main Process (Logic & IPC).
+- `renderer.js`: Desktop UI & Agent Engine.
+- `oauth.js`: Secure Google Auth loopback server.
 
 ---
 
-## 📖 Using Autonomous Agents
-
-To create an autonomous worker:
-1. Click the **Agent Icon (🤖)** in the top bar.
-2. Provide a **Name** and select a **Schedule** (Cron expression).
-3. Select the **Target Folder** the agent should monitor.
-4. Write the **Master Instruction** (e.g., "Review all new code for security vulnerabilities and SEO improvements").
-5. The agent will now run in the background. You can close the main window; the app stays active in the system tray.
-
-> [!TIP]
-> **Pro Tip:** If you want your agent to maintain a complex state, tell it to use the `<AGENT_MEMORY>` tag at the end of its reports. GeminiBot will handle the persistence for you!
+## 📜 Documentation
+- **[DISTRIBUTION.md](DISTRIBUTION.md)**: Full guide for packaging and releases.
+- **[usability_analysis.md](usability_analysis.md)**: DX and UI audit results.
 
 ---
-
-## 📄 License
-GeminiBot is released under the MIT License. Built with ❤️ for the AI automation community.
-
+**Author:** [Pablo Cirre](https://github.com/PabloCirre)  
+**License:** [MIT](LICENSE)  
+*Professional Agent Framework. Locally Sovereignty. AI Power.*
