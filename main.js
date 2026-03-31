@@ -4,8 +4,6 @@ const path = require('path');
 let tray = null;
 let window = null;
 
-// Temporarily commenting this out so you see the dock icon
-// app.dock.hide();
 function createTray() {
   // Use the robot SVG file as our Tray icon
   // The word "Template" at the end of the filename signals macOS to automatically
@@ -75,8 +73,11 @@ function toggleWindow() {
 const oauth = require('./oauth.js');
 
 app.on('ready', () => {
-  // Set the dock icon for macOS during development
-  app.dock.setIcon(path.join(__dirname, 'robotTemplate.png'));
+  // Ensure Dock icon is visible and uses high-res logo
+  if (process.platform === 'darwin') {
+    app.dock.setIcon(path.join(__dirname, 'icon.png'));
+    app.dock.show();
+  }
 
   createTray();
   createWindow();
