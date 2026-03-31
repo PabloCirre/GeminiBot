@@ -1,18 +1,21 @@
+/**
+ * GeminiBot Renderer Process
+ * Manages the UI state, Chat interactions, and Autonomous Agent orchestration.
+ */
 const { ipcRenderer, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
 
-// UI Elements
+// --- UI DOM References ---
 const settingsToggle = document.getElementById('settings-toggle');
 const agentsToggle = document.getElementById('agents-toggle');
 const closeAppBtn = document.getElementById('close-app');
-
 const settingsPanel = document.getElementById('settings-panel');
 const agentsPanel = document.getElementById('agents-panel');
 const saveSettingsBtn = document.getElementById('save-settings');
 
-// Auth & Models
+// Auth & Configuration
 const clientIdInput = document.getElementById('client-id');
 const clientSecretInput = document.getElementById('client-secret');
 const oauthLoginBtn = document.getElementById('oauth-login');
@@ -23,7 +26,7 @@ const systemPromptInput = document.getElementById('system-prompt');
 const selectFolderBtn = document.getElementById('select-folder-btn');
 const selectedFolderDisplay = document.getElementById('selected-folder-display');
 
-// Custom Model Selector
+// Custom Model UI
 const customModelSelector = document.getElementById('custom-model-selector');
 const modelDropdown = document.getElementById('model-dropdown');
 const selectedModelText = document.getElementById('selected-model-text');
@@ -33,7 +36,7 @@ const chatContainer = document.getElementById('chat-container');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
 
-// Agents UI
+// Agents Management UI
 const agentsList = document.getElementById('agents-list');
 const agentNameInput = document.getElementById('agent-name');
 const agentCronSelect = document.getElementById('agent-cron');
@@ -45,14 +48,16 @@ const addAgentBtn = document.getElementById('add-agent-btn');
 const editingAgentIdInput = document.getElementById('editing-agent-id');
 const cancelEditBtn = document.getElementById('cancel-edit-btn');
 
-// Global State
+// --- Global Application State ---
 let accessToken = null;
 let chatHistory = [];
 let localContextPath = null;
 let savedAgents = [];
-let activeCronJobs = {}; // maps agent id to cron task
+let activeCronJobs = {}; // Registry of node-cron tasks by agent ID
 
-// Cron Mapping Dict
+/**
+ * Human-readable labels for cron expressions.
+ */
 const CRON_LABELS = {
     '* * * * *': 'Every Minute (Test)',
     '0 * * * *': 'Every Hour',
@@ -60,24 +65,25 @@ const CRON_LABELS = {
     '0 3 * * *': 'Nightly (3:00 AM)'
 };
 
-// 1. Initialization
+/**
+ * 1. Initialization Logic
+ * Loads persistent settings, identifies OAuth status, and bootstraps agents.
+ */
 let loadSettings = () => {
-    // Auth
     clientIdInput.value = localStorage.getItem('oauth_client_id') || '';
     clientSecretInput.value = localStorage.getItem('oauth_client_secret') || '';
     projectSelect.value = localStorage.getItem('gemini_project') || 'none';
     systemPromptInput.value = localStorage.getItem('gemini_system') || '';
     
-    // Context
     localContextPath = localStorage.getItem('local_context_path') || null;
     if (localContextPath) {
         selectedFolderDisplay.innerText = "Context: " + localContextPath;
     }
     
-    // Auth Refresh
     const savedModel = localStorage.getItem('gemini_model');
     const refreshToken = localStorage.getItem('oauth_refresh_token');
     
+    // Auto-login attempt if refresh token exists
     if (refreshToken && clientIdInput.value && clientSecretInput.value) {
         authStatus.innerText = "Refreshing token...";
         ipcRenderer.invoke('oauth-refresh', clientIdInput.value, clientSecretInput.value, refreshToken)
@@ -94,7 +100,6 @@ let loadSettings = () => {
             });
     }
 
-    // Load Agents
     try {
         savedAgents = JSON.parse(localStorage.getItem('antigravity_agents') || '[]');
     } catch(e) { savedAgents = []; }
@@ -250,7 +255,13 @@ saveSettingsBtn.addEventListener('click', () => {
     settingsPanel.classList.remove('active');
 });
 
-// 4. File Reading Logic (Re-usable)
+/**
+ * 4. File System Scraper
+ * Recursively reads codebase context for LLM injection.
+ * @param {string} dirPath - Folder to analyze.
+ * @param {string[]} allowedExtensions - Filter for code files.
+ * @returns {string} - Aggregated text content of files.
+ */
 function readContextFolder(dirPath, allowedExtensions = ['.js', '.py', '.php', '.html', '.css', '.md', '.json', '.txt']) {
     let result = '';
     const ignoreDirs = ['node_modules', '.git', 'vendor', '__pycache__', 'dist', 'build', 'artifacts'];
@@ -304,6 +315,11 @@ function appendMessage(role, text) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+/**
+ * 5. Messaging Controller
+ * Handles the user chat input, injects local context if available,
+ * and communicates with the Gemini API.
+ */
 async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
@@ -509,6 +525,10 @@ function renderAgents() {
     });
 }
 
+/**
+ * 6. Autonomous Agents Engine
+ * Manages the background lifecycle of Cron-scheduled tasks.
+ */
 function scheduleAllAgents() {
     // 1. Destroy existing jobs
     for (const id in activeCronJobs) {
@@ -531,6 +551,14 @@ function scheduleAllAgents() {
     console.log(`[Agents] Scheduled ${Object.keys(activeCronJobs).length} active jobs.`);
 }
 
+/**
+ * Core Agent Execution Lifecycle
+ * 1. Read persistent memory from disk.
+ * 2. Scrape target folder context.
+ * 3. Instruct Gemini to update its state.
+ * 4. Persist new memory and generate Markdown report.
+ * @param {Object} agent - The agent configuration object.
+ */
 async function executeAgentJob(agent) {
     if (!accessToken) {
         new Notification("GeminiBot Agent Failed", { body: `Agent '${agent.name}' failed to run: You are not logged in.`});

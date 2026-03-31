@@ -1,8 +1,10 @@
 {
-  "name": "gemini-bot",
-  "version": "1.0.0",
-  "description": "Antigravity Gemini Menu Bar App",
+  "name": "geminibot",
+  "version": "1.1.0",
+  "description": "Professional autonomous agent framework with Gemini 2.0 integration and persistent memory.",
   "main": "main.js",
+  "author": "Pablo Cirre",
+  "license": "MIT",
   "scripts": {
     "start": "electron ."
   },
@@ -11,5 +13,14 @@
   },
   "dependencies": {
     "node-cron": "^4.2.1"
-  }
+  },
+  "keywords": [
+    "Gemini",
+    "Autonomous",
+    "Agent",
+    "AI",
+    "Automation",
+    "Codex",
+    "Electron"
+  ]
 }

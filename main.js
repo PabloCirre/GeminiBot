@@ -1,127 +1,121 @@
-const { app, BrowserWindow, Tray, nativeImage, ipcMain } = require('electron');
+/**
+ * GeminiBot Main Process
+ * Handles window persistence, system tray, and secure OAuth communication.
+ */
+const { app, BrowserWindow, Tray, nativeImage, ipcMain, dialog } = require('electron');
 const path = require('path');
+const oauth = require('./oauth.js');
 
 let tray = null;
 let window = null;
 
+/**
+ * Creates the macOS system tray icon and menu.
+ */
 function createTray() {
-  // Use the robot SVG file as our Tray icon
-  // The word "Template" at the end of the filename signals macOS to automatically
-  // adjust the color to black/white depending on light/dark mode
-  const iconPath = path.join(__dirname, 'robotTemplate.svg');
+  const iconPath = path.join(__dirname, 'assets', 'robotTemplate.svg');
   const iconImage = nativeImage.createFromPath(iconPath);
   
   tray = new Tray(iconImage);
-  tray.setToolTip('Antigravity Gemini Bot');
+  tray.setToolTip('GeminiBot Autonomous Agents');
   
-  tray.on('click', (event, bounds) => {
-    toggleWindow();
-  });
+  tray.on('click', () => toggleWindow());
 }
 
-function getWindowPosition() {
-  const windowBounds = window.getBounds();
-  const trayBounds = tray.getBounds();
-  
-  // Calculate X and Y coordinates to attach the window to the tray icon
-  const x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2));
-  const y = Math.round(trayBounds.y + trayBounds.height + 4);
-  
-  return { x: x, y: y };
-}
-
+/**
+ * Initializes the main application window with glassmorphism support.
+ */
 function createWindow() {
   window = new BrowserWindow({
     width: 650,
     height: 750,
-    icon: path.join(__dirname, 'robotTemplate.png'),
-    show: true,      // Show it immediately so user can see it
-    frame: false,     // Frameless window
+    icon: path.join(__dirname, 'assets', 'icon.png'),
+    show: true,
+    frame: false,
     fullscreenable: false,
     resizable: true,
     minWidth: 500,
     minHeight: 600,
-    transparent: true, // Needed for rounded corners / glassmorphism outside HTML body
+    transparent: true,
     alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      backgroundThrottling: false
+      backgroundThrottling: false // Critical for background cron execution
     }
   });
 
   window.loadFile('index.html');
-
-  // Hide the window when it loses focus
-  window.on('blur', () => {
-    // if (!window.webContents.isDevToolsOpened()) {
-    //   window.hide();
-    // }
-  });
 }
 
+/**
+ * Toggles window visibility between tray and foreground.
+ */
 function toggleWindow() {
   if (window.isVisible()) {
     window.hide();
   } else {
-    // Eliminamos el reposicionamiento forzado para que la ventana se quede donde la dejaste
     window.show();
     window.focus();
   }
 }
 
-const oauth = require('./oauth.js');
+// --- Lifecycle Events ---
 
 app.on('ready', () => {
-  // Ensure Dock icon is visible and uses high-res logo
+  // macOS Dock Icon Configuration
   if (process.platform === 'darwin') {
-    app.dock.setIcon(path.join(__dirname, 'icon.png'));
+    app.dock.setIcon(path.join(__dirname, 'assets', 'icon.png'));
     app.dock.show();
   }
 
   createTray();
   createWindow();
   
-  // Hacer que flote en todos los escritorios (spaces) de macOS
+  // Floating Window Setup
   window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  
   window.center();
   window.show();
   window.focus();
 });
 
-ipcMain.on('quit-app', () => {
-    app.quit();
-});
+// --- IPC Communication Handlers ---
 
-// OAuth IPC Handlers
+ipcMain.on('quit-app', () => app.quit());
+
+/**
+ * Handles the Google OAuth 2.0 Login flow.
+ */
 ipcMain.handle('oauth-login', async (event, clientId, clientSecret) => {
   try {
     oauth.setCredentials(clientId, clientSecret);
     const tokens = await oauth.login(window);
-    return { success: true, tokens: tokens };
+    return { success: true, tokens };
   } catch (error) {
     return { success: false, error: error.message };
   }
 });
 
+/**
+ * Refreshes an expired OAuth access token.
+ */
 ipcMain.handle('oauth-refresh', async (event, clientId, clientSecret, refreshToken) => {
   try {
     oauth.setCredentials(clientId, clientSecret);
     const tokens = await oauth.refreshToken(refreshToken);
-    return { success: true, tokens: tokens };
+    return { success: true, tokens };
   } catch (error) {
     return { success: false, error: error.message };
   }
 });
 
-const { dialog } = require('electron');
+/**
+ * Triggers a native system dialog for folder selection.
+ */
 ipcMain.handle('open-directory-dialog', async () => {
   const result = await dialog.showOpenDialog(window, {
     properties: ['openDirectory']
   });
-  if (result.canceled) {
-    return null;
-  }
-  return result.filePaths[0];
+  return result.canceled ? null : result.filePaths[0];
 });
+

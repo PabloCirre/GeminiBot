@@ -1,15 +1,18 @@
-const { BrowserWindow, shell } = require('electron');
+const { shell } = require('electron');
 const http = require('http');
 const url = require('url');
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
-// These should ideally be set by the user or dynamically
 let clientId = '';
 let clientSecret = '';
 
-// Reusable OAuth Class
+/**
+ * GoogleOAuth Module
+ * Manages the full OAuth 2.0 flow using a temporary local HTTP server
+ * to intercept the authorization code from the system browser.
+ */
 class GoogleOAuth {
   constructor() {
     this.port = 3000;
@@ -22,6 +25,10 @@ class GoogleOAuth {
     clientSecret = secret;
   }
 
+  /**
+   * Generates the Google Authorization URL.
+   * @returns {string} - Full auth URL.
+   */
   getAuthUrl() {
     const params = new URLSearchParams({
       client_id: clientId,
@@ -34,6 +41,11 @@ class GoogleOAuth {
     return `${GOOGLE_AUTH_URL}?${params.toString()}`;
   }
 
+  /**
+   * Starts the local server and opens the browser for user login.
+   * @param {BrowserWindow} parentWindow - Reference to the main window.
+   * @returns {Promise<Object>} - The exchanged tokens.
+   */
   async login(parentWindow) {
     if (!clientId || !clientSecret) {
       throw new Error("Client ID and Client Secret are not configured.");
@@ -83,6 +95,11 @@ class GoogleOAuth {
     });
   }
 
+  /**
+   * Exchanges an authorization code for an access/refresh token pair.
+   * @param {string} code - The code from the redirect.
+   * @returns {Promise<Object>} - Token data.
+   */
   async exchangeCodeForToken(code) {
     const body = new URLSearchParams({
       client_id: clientId,
@@ -107,6 +124,11 @@ class GoogleOAuth {
     return data; // { access_token, refresh_token, expires_in, scope, token_type }
   }
 
+  /**
+   * Refreshes an expired access token using a refresh token.
+   * @param {string} refreshToken - The stored refresh token.
+   * @returns {Promise<Object>} - New access token data.
+   */
   async refreshToken(refreshToken) {
     const body = new URLSearchParams({
       client_id: clientId,
