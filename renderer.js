@@ -39,6 +39,7 @@ const sendBtn = document.getElementById('send-btn');
 // Agents Management UI
 const agentsList = document.getElementById('agents-list');
 const agentNameInput = document.getElementById('agent-name');
+const agentGroupInput = document.getElementById('agent-group');
 const agentCronSelect = document.getElementById('agent-cron');
 const agentFolderBtn = document.getElementById('agent-folder-btn');
 const agentFolderDisplay = document.getElementById('agent-folder-display');
@@ -377,6 +378,7 @@ async function sendMessage() {
 // 6. Agents (Cron) Subsystem
 function resetAgentForm() {
     agentNameInput.value = '';
+    agentGroupInput.value = '';
     agentPromptInput.value = '';
     agentFolderPathHidden.value = '';
     agentFolderDisplay.innerText = '';
@@ -389,6 +391,7 @@ cancelEditBtn.addEventListener('click', resetAgentForm);
 
 addAgentBtn.addEventListener('click', () => {
     const name = agentNameInput.value.trim();
+    const group = agentGroupInput.value.trim() || 'General';
     const cronExp = agentCronSelect.value;
     const folder = agentFolderPathHidden.value;
     const prompt = agentPromptInput.value.trim();
@@ -400,19 +403,19 @@ addAgentBtn.addEventListener('click', () => {
     }
 
     if (editingId) {
-        // Update
         const idx = savedAgents.findIndex(a => a.id === editingId);
         if (idx > -1) {
             savedAgents[idx].name = name;
+            savedAgents[idx].group = group;
             savedAgents[idx].cron = cronExp;
             savedAgents[idx].folder = folder;
             savedAgents[idx].prompt = prompt;
         }
     } else {
-        // Create
         const agent = {
             id: 'agent_' + Date.now(),
             name: name,
+            group: group,
             cron: cronExp,
             folder: folder,
             prompt: prompt,
@@ -433,95 +436,109 @@ function renderAgents() {
         agentsList.innerHTML = '<div style="color: var(--text-secondary); text-align: center; font-size: 12px; padding: 10px;">No active agents.</div>';
         return;
     }
-    
-    savedAgents.forEach(agent => {
-        const card = document.createElement('div');
-        card.className = 'agent-card';
-        const friendlyCron = CRON_LABELS[agent.cron] || agent.cron;
-        
-        let viewOutputHtml = '';
-        if (agent.lastOutput) {
-            viewOutputHtml = `
-            <div class="agent-actions" style="margin-top: 0;">
-                <button class="agent-btn view view-btn" data-id="${agent.id}">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    View Result
-                </button>
-            </div>`;
-        }
-        
-        card.innerHTML = `
-            <div class="agent-header">
-                <span class="agent-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>${agent.name}</span>
-                <span class="agent-cron">${friendlyCron}</span>
-            </div>
-            <div class="agent-folder">Context: ...${agent.folder.slice(-25)}</div>
-            ${viewOutputHtml}
-            <div class="agent-actions">
-                <button class="agent-btn run run-btn" data-id="${agent.id}" id="run-btn-${agent.id}">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    Run
-                </button>
-                <button class="agent-btn edit edit-btn" data-id="${agent.id}">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    Edit
-                </button>
-                <button class="agent-btn danger del-btn" data-id="${agent.id}">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                    Delete
-                </button>
-            </div>
+
+    // Group agents by their 'group' field
+    const grouped = savedAgents.reduce((acc, agent) => {
+        const key = agent.group || 'General';
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(agent);
+        return acc;
+    }, {});
+
+    Object.keys(grouped).sort().forEach(groupName => {
+        // Group Header (Folder)
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'agent-group-header';
+        groupHeader.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            ${groupName}
         `;
-        agentsList.appendChild(card);
+        agentsList.appendChild(groupHeader);
+
+        grouped[groupName].forEach(agent => {
+            const card = document.createElement('div');
+            card.className = 'agent-card';
+            const friendlyCron = CRON_LABELS[agent.cron] || agent.cron;
+            
+            // Skill Detection Visual Badge
+            let skillsBadge = '';
+            const skillsPath = path.join(agent.folder, 'skills.md');
+            const skillsDir = path.join(agent.folder, 'skills');
+            if (fs.existsSync(skillsPath) || fs.existsSync(skillsDir)) {
+                skillsBadge = '<span class="skill-badge" title="Specialized Skills Active">⚡ Skills</span>';
+            }
+
+            let viewOutputHtml = '';
+            if (agent.lastOutput) {
+                viewOutputHtml = `
+                <div class="agent-actions" style="margin-top: 0;">
+                    <button class="agent-btn view view-btn" data-id="${agent.id}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        View Result
+                    </button>
+                </div>`;
+            }
+            
+            card.innerHTML = `
+                <div class="agent-header">
+                    <span class="agent-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>${agent.name}</span>
+                    <span class="agent-cron">${friendlyCron}</span>
+                </div>
+                <div class="agent-folder" style="display:flex; justify-content: space-between;">
+                    <span>Folder: ...${agent.folder.slice(-20)}</span>
+                    ${skillsBadge}
+                </div>
+                ${viewOutputHtml}
+                <div class="agent-actions">
+                    <button class="agent-btn run run-btn" data-id="${agent.id}" id="run-btn-${agent.id}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Run
+                    </button>
+                    <button class="agent-btn edit edit-btn" data-id="${agent.id}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        Edit
+                    </button>
+                    <button class="agent-btn danger del-btn" data-id="${agent.id}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        Delete
+                    </button>
+                </div>
+            `;
+            agentsList.appendChild(card);
+        });
     });
 
-    // Attach Action Events
-    document.querySelectorAll('.del-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
+    // Event Delegation for action buttons
+    agentsList.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const agent = savedAgents.find(a => a.id === id);
+
+        if (btn.classList.contains('del-btn')) {
             savedAgents = savedAgents.filter(a => a.id !== id);
             localStorage.setItem('antigravity_agents', JSON.stringify(savedAgents));
             renderAgents();
             scheduleAllAgents();
-        });
-    });
-
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
-            const agent = savedAgents.find(a => a.id === id);
+        } else if (btn.classList.contains('edit-btn')) {
             if (agent) {
                 agentNameInput.value = agent.name;
+                agentGroupInput.value = agent.group || 'General';
                 agentCronSelect.value = agent.cron;
                 agentFolderPathHidden.value = agent.folder;
                 agentFolderDisplay.innerText = "Target: ..." + agent.folder.slice(-25);
                 agentPromptInput.value = agent.prompt;
                 editingAgentIdInput.value = agent.id;
-                
-                addAgentBtn.innerText = '💾 Update Agent';
+                addAgentBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Update Agent';
                 cancelEditBtn.style.display = 'block';
             }
-        });
-    });
-
-    document.querySelectorAll('.run-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
-            const agent = savedAgents.find(a => a.id === id);
+        } else if (btn.classList.contains('run-btn')) {
             if (agent) executeAgentJob(agent);
-        });
-    });
-    
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
-            const agent = savedAgents.find(a => a.id === id);
+        } else if (btn.classList.contains('view-btn')) {
             if (agent && agent.lastOutput) {
-                 shell.openPath(agent.lastOutput).then(msg => {
-                    if (msg) console.error("Error opening file:", msg);
-                 });
+                shell.openPath(agent.lastOutput);
             }
-        });
+        }
     });
 }
 
@@ -584,6 +601,25 @@ async function executeAgentJob(agent) {
         const contextData = readContextFolder(agent.folder);
         let sysPrompt = agent.prompt;
         
+        // --- SKILLS DETECTION ---
+        const skillsPath = path.join(agent.folder, 'skills.md');
+        const skillsDir = path.join(agent.folder, 'skills');
+        let skillsContent = '';
+
+        if (fs.existsSync(skillsPath)) {
+            skillsContent += `\n# SKILL: DOCUMENTED INSTRUCTIONS\n${fs.readFileSync(skillsPath, 'utf8')}\n`;
+        }
+        if (fs.existsSync(skillsDir)) {
+            const skillFiles = fs.readdirSync(skillsDir).filter(f => f.endsWith('.md'));
+            skillFiles.forEach(sf => {
+                const sfContent = fs.readFileSync(path.join(skillsDir, sf), 'utf8');
+                skillsContent += `\n# SKILL: ${sf.toUpperCase()}\n${sfContent}\n`;
+            });
+        }
+        if (skillsContent) {
+            sysPrompt += "\n\n# AGENT SPECIALIZED SKILLS (YOU MUST FOLLOW THESE RULES):\n" + skillsContent;
+        }
+
         if (memoryContent) {
             sysPrompt += "\n\n# TU MEMORIA DE LA SESIÓN ANTERIOR (RETOMA DESDE AQUÍ):\n" + memoryContent;
         }
