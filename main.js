@@ -119,3 +119,21 @@ ipcMain.handle('open-directory-dialog', async () => {
   return result.canceled ? null : result.filePaths[0];
 });
 
+const { exec } = require('child_process');
+/**
+ * Safe Shell Bridge
+ * Executes commands in the agent's target folder.
+ */
+ipcMain.handle('exec-command', async (event, command, cwd) => {
+  return new Promise((resolve) => {
+    exec(command, { cwd }, (error, stdout, stderr) => {
+      resolve({
+        success: !error,
+        stdout: stdout || '',
+        stderr: stderr || '',
+        error: error ? error.message : null
+      });
+    });
+  });
+});
+

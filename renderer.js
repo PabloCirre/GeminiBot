@@ -460,6 +460,23 @@ function renderAgents() {
             card.className = 'agent-card';
             const friendlyCron = CRON_LABELS[agent.cron] || agent.cron;
             
+            // Pending Command UI (OpenClaw pattern)
+            let commandHtml = '';
+            if (agent.pendingCommand) {
+                commandHtml = `
+                <div class="command-box">
+                    <div class="command-header">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                        Proposed Command
+                    </div>
+                    <code class="command-text">${agent.pendingCommand}</code>
+                    <button class="agent-btn run-cmd-btn" data-id="${agent.id}" style="width: 100%; margin-top: 8px; background: var(--accent); color: #000; font-weight: 700;">
+                        Execute Command
+                    </button>
+                    <div class="command-output" id="output-${agent.id}" style="display:none;"></div>
+                </div>`;
+            }
+
             // Skill Detection Visual Badge
             let skillsBadge = '';
             const skillsPath = path.join(agent.folder, 'skills.md');
@@ -471,12 +488,10 @@ function renderAgents() {
             let viewOutputHtml = '';
             if (agent.lastOutput) {
                 viewOutputHtml = `
-                <div class="agent-actions" style="margin-top: 0;">
                     <button class="agent-btn view view-btn" data-id="${agent.id}">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        View Result
-                    </button>
-                </div>`;
+                        View Report
+                    </button>`;
             }
             
             card.innerHTML = `
@@ -488,8 +503,9 @@ function renderAgents() {
                     <span>Folder: ...${agent.folder.slice(-20)}</span>
                     ${skillsBadge}
                 </div>
-                ${viewOutputHtml}
-                <div class="agent-actions">
+                ${commandHtml}
+                <div class="agent-actions" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px;">
+                    ${viewOutputHtml}
                     <button class="agent-btn run run-btn" data-id="${agent.id}" id="run-btn-${agent.id}">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         Run
@@ -509,7 +525,7 @@ function renderAgents() {
     });
 
     // Event Delegation for action buttons
-    agentsList.addEventListener('click', (e) => {
+    agentsList.addEventListener('click', async (e) => {
         const btn = e.target.closest('button');
         if (!btn) return;
         const id = btn.getAttribute('data-id');
@@ -537,6 +553,29 @@ function renderAgents() {
         } else if (btn.classList.contains('view-btn')) {
             if (agent && agent.lastOutput) {
                 shell.openPath(agent.lastOutput);
+            }
+        } else if (btn.classList.contains('run-cmd-btn')) {
+            if (agent && agent.pendingCommand) {
+                const outputEl = document.getElementById(`output-${agent.id}`);
+                btn.disabled = true;
+                btn.innerText = "Executing...";
+                outputEl.style.display = 'block';
+                outputEl.innerText = "Running command...";
+                
+                const result = await ipcRenderer.invoke('exec-command', agent.pendingCommand, agent.folder);
+                
+                if (result.success) {
+                    outputEl.style.color = "#4caf50";
+                    outputEl.innerText = result.stdout || "Success (no output)";
+                    agent.pendingCommand = null; // Clear on success
+                    localStorage.setItem('antigravity_agents', JSON.stringify(savedAgents));
+                    setTimeout(() => renderAgents(), 3000);
+                } else {
+                    outputEl.style.color = "#ff5252";
+                    outputEl.innerText = result.stderr || result.error;
+                    btn.disabled = false;
+                    btn.innerText = "Execute Command";
+                }
             }
         }
     });
@@ -600,6 +639,16 @@ async function executeAgentJob(agent) {
 
         const contextData = readContextFolder(agent.folder);
         let sysPrompt = agent.prompt;
+
+        // --- ENVIRONMENT HEARTBEAT (Moltbot pattern) ---
+        const envInfo = `
+# ENVIRONMENT CONTEXT:
+- Operating System: ${process.platform} (${process.arch})
+- Current Time: ${new Date().toLocaleString()}
+- Working Directory: ${agent.folder}
+- Shell Environment: ${process.platform === 'win32' ? 'PowerShell/CMD' : 'zsh/bash'}
+`;
+        sysPrompt = envInfo + "\n" + sysPrompt;
         
         // --- SKILLS DETECTION ---
         const skillsPath = path.join(agent.folder, 'skills.md');
@@ -629,11 +678,11 @@ async function executeAgentJob(agent) {
         }
 
         // Strict Memory Constraint
-        sysPrompt += "\n\n# MANDATORY MEMORY INSTRUCTION:\nAt the end of your response, you MUST include a block wrapping your progress for your future self, using exactly these HTML tags:\n<AGENT_MEMORY>\n(Write here your state, what you have done and what you should do next time you wake up)\n</AGENT_MEMORY>\nThis is vital for maintaining your continuity.";
+        sysPrompt += "\n\n# MANDATORY MEMORY INSTRUCTION:\nAt the end of your response, you MUST include a block wrapping your progress for your future self, using exactly these HTML tags:\n<AGENT_MEMORY>\n(Write here your state, what you have done and what you should do next time you wake up)\n</AGENT_MEMORY>\nThis is vital for maintaining your continuity.\n\n# AUTONOMOUS SHELL INSTRUCTION:\nIf you need to execute a command to advance your task (like 'git commit', 'npm test', etc.), wrap exactly ONE command in <SHELL> tags like this:\n<SHELL>npm test</SHELL>\nThe user will review and execute it from the dashboard.";
 
         const payload = {
-            contents: [{ role: 'user', parts: [{ text: "Wake up. Review your system instructions, memory, and local code, and fulfill your task." }] }],
-            systemInstruction: { parts: [{ text: sysPrompt }] }
+            contents: [{ role: 'user', parts: [{ text: "Wake up. Review your system instructions, environment, memory, and local code, and fulfill your task." }] }],
+            systemInstruction: { text: sysPrompt }
         };
 
         const currentModel = localStorage.getItem('gemini_model') || 'gemini-1.5-pro';
@@ -652,10 +701,18 @@ async function executeAgentJob(agent) {
         if (outputText) {
             let cleanOutput = outputText;
             const memoryMatch = outputText.match(/<AGENT_MEMORY>([\s\S]*?)<\/AGENT_MEMORY>/i);
-            
+            const shellMatch = outputText.match(/<SHELL>([\s\S]*?)<\/SHELL>/i);
+
             if (memoryMatch && memoryMatch[1]) {
                 fs.writeFileSync(memoryPath, memoryMatch[1].trim());
                 cleanOutput = outputText.replace(/<AGENT_MEMORY>[\s\S]*?<\/AGENT_MEMORY>/i, '').trim();
+            }
+
+            if (shellMatch && shellMatch[1]) {
+                agent.pendingCommand = shellMatch[1].trim();
+                cleanOutput = cleanOutput.replace(/<SHELL>[\s\S]*?<\/SHELL>/i, '').trim();
+            } else {
+                agent.pendingCommand = null;
             }
 
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -668,7 +725,7 @@ async function executeAgentJob(agent) {
             localStorage.setItem('antigravity_agents', JSON.stringify(savedAgents));
             renderAgents();
             
-            new Notification("GeminiBot Agent Completed", { body: `Report: ${fileName} ${memoryMatch ? '(Memory Updated)' : ''}`});
+            new Notification("GeminiBot Agent Completed", { body: `Report: ${fileName} ${shellMatch ? '(Action Required)' : ''}`});
         }
     } catch (error) {
         console.error(`Agent ${agent.name} Error:`, error);
