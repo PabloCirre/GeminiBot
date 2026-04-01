@@ -1,8 +1,8 @@
 {
-  "name": "geminibot",
-  "version": "1.1.0",
+  "name": "pibot",
+  "version": "1.2.0",
   "description": "Professional autonomous agent framework with Gemini 2.0 integration and persistent memory.",
-  "main": "main.js",
+  "main": "src/main.js",
   "author": "Pablo Cirre",
   "license": "MIT",
   "scripts": {
@@ -12,8 +12,8 @@
     "build:all": "electron-builder --mac --win"
   },
   "build": {
-    "appId": "com.pablocirre.geminibot",
-    "productName": "GeminiBot",
+    "appId": "com.pablocirre.pibot",
+    "productName": "PIBOT",
     "mac": {
       "category": "public.app-category.developer-tools",
       "icon": "build/icon.icns",
@@ -31,7 +31,7 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "GeminiBot"
+      "shortcutName": "PIBOT"
     },
     "directories": {
       "output": "dist"
@@ -48,10 +48,11 @@
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
+    "menubar": "^9.5.2",
     "node-cron": "^4.2.1"
   },
   "keywords": [
-    "Gemini",
+    "PIBOT",
     "Autonomous",
     "Agent",
     "AI",

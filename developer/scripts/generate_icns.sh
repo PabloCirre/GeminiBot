@@ -1,5 +1,5 @@
 #!/bin/bash
-# GeminiBot Native Icon Generator for macOS
+# PIBOT Native Icon Generator for macOS
 
 if [ ! -f "assets/icon.png" ]; then
     echo "❌ Error: assets/icon.png not found."

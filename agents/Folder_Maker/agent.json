@@ -1,0 +1,6 @@
+{
+    "name": "Folder Maker Bot",
+    "group": "Proof of Work",
+    "cron": "* * * * *",
+    "prompt": "Crea una carpeta llamada 'BOT_SUCCESS_PROOF' en tu directorio de trabajo actual para confirmar que el sistema de comandos funciona. No hagas nada más."
+}

@@ -1,72 +1,81 @@
-# 🤖 GeminiBot: Professional Autonomous AI Framework
+# PIBOT / GeminiBot
 
-GeminiBot is a desktop application (macOS/Windows) for building and managing **Autonomous AI Agents** powered by the Gemini 2.0 Pro/Flash models. It combines zero-drift persistence, local file system context, and a secure shell action bridge.
+PIBOT is a local Electron desktop app for managing simple autonomous agents from a tray-style interface. This repository contains:
 
----
+- `PIBOT.app/`: a packaged macOS build already exported in the repo.
+- `agents/`: the runtime workspace where each agent keeps its own folder and config.
+- `developer/`: the editable Electron source, assets, scripts, and build configuration.
+- `pibot.sh`: a small CLI wrapper around the developer CLI.
 
-## ⚡ Key Features
+## Current State
 
-- **Autonomous Proactive Reasoning**: Agents scan their local environment and propose actions (Moltbot pattern).
-- **Secure Shell Bridge**: Review and execute terminal commands proposed by your agents.
-- **Multimodal Persistence**: Agents maintain memory across sessions using `.agent_memory` files.
-- **Skill-Based Plug-and-Play**: Inject specialized logic into any agent via the `/skills` directory or `skills.md`.
-- **Professional UI/UX**: High-performance dark glassmorphism interface with SVG iconography.
-- **Privacy First**: All tokens, memory, and logs reside locally on your machine.
+The project is partially productized and partially prototype:
 
----
+- The desktop UI, project scanner, agent list, forms, and tray integration are implemented.
+- Agents are discovered from `agents/*` and can be launched manually from the UI or CLI.
+- Agent execution now runs through `developer/src/agent_handler.js`, which combines local project heuristics with the selected model runtime when available.
+- Google OAuth is wired through `developer/src/oauth.js`.
+- `FREE BIRD` mode is available in settings with support for local Ollama runtimes and self-hosted OpenAI-compatible endpoints.
+- Cron scheduling can execute agents when Autonomous Mode is enabled.
+- Persistence is handled with browser `localStorage`, not a database.
 
-## 🚀 Getting Started
+## Quick Start
 
-### 1. Download & Install
-Check the **[GitHub Releases](https://github.com/PabloCirre/GeminiBot/releases)** for the latest standalone binaries:
-- **macOS:** `GeminiBot-1.1.0-arm64.dmg`
-- **Windows:** `GeminiBot Setup 1.1.0.exe`
+### Run the packaged app
 
-### 2. Configure OAuth 2.0
-GeminiBot uses the secure Google Cloud OAuth 2.0 flow. 
-- Input your **Client ID** and **Client Secret**.
-- Click **"Login with Google"**.
-- Your tokens are stored securely in `localStorage`.
+Open `PIBOT.app` on macOS.
 
----
-
-## 🛠️ Developer Setup (Building from Source)
-
-If you wish to modify or build GeminiBot yourself:
+### Run from source
 
 ```bash
-# Clone the repository
-git clone https://github.com/PabloCirre/GeminiBot.git
-
-# Install dependencies
+cd developer
 npm install
-
-# Start in developer mode
 npm start
-
-# Generate standard binaries
-bash scripts/generate_icns.sh
-npm run build:mac   # For macOS
-npm run build:win   # For Windows
 ```
 
----
+### Use the CLI
 
-## 📂 Project Architecture
+```bash
+./pibot.sh --help
+./pibot.sh agents list
+./pibot.sh agents wake Folder_Maker
+```
 
-- `/assets`: Brand icons and UI templates.
-- `/skills`: Global or local specialized instructions for bots.
-- `main.js`: Electron Main Process (Logic & IPC).
-- `renderer.js`: Desktop UI & Agent Engine.
-- `oauth.js`: Secure Google Auth loopback server.
+## Project Layout
 
----
+```text
+.
+├── PIBOT.app/                 # Bundled macOS app
+├── agents/                    # Agent folders and persistent files
+│   ├── <AgentName>/agent.json
+│   ├── <AgentName>/skills.md
+│   └── <AgentName>/memory.md
+├── developer/
+│   ├── src/                   # Electron main/renderer source
+│   ├── scripts/               # Validation, build, and CLI helpers
+│   ├── assets/                # Icons and brand assets
+│   ├── README.md
+│   └── ARCHITECTURE.md
+└── pibot.sh                   # CLI entrypoint
+```
 
-## 📜 Documentation
-- **[DISTRIBUTION.md](DISTRIBUTION.md)**: Full guide for packaging and releases.
-- **[usability_analysis.md](usability_analysis.md)**: DX and UI audit results.
+## Important Files
 
----
-**Author:** [Pablo Cirre](https://github.com/PabloCirre)  
-**License:** [MIT](LICENSE)  
-*Professional Agent Framework. Locally Sovereignty. AI Power.*
+- `developer/src/main.js`: Electron main process, tray setup, IPC handlers, shell execution bridge.
+- `developer/src/renderer.js`: UI state, local persistence, FREE BIRD settings, agent discovery, project scanning, cron execution, zen mode.
+- `developer/src/agent_handler.js`: runtime that gathers project context and calls the active provider.
+- `developer/src/model_runtime.js`: provider layer for Ollama, OpenAI-compatible endpoints, and runtime actions.
+- `developer/src/oauth.js`: Google OAuth implementation used by the app.
+- `developer/scripts/pibot.js`: CLI for listing, creating, waking, validating, and building agents.
+
+## Documentation
+
+- [Developer README](developer/README.md)
+- [Architecture Guide](developer/ARCHITECTURE.md)
+- [Distribution Guide](developer/DISTRIBUTION.md)
+- [Release Notes](developer/RELEASE_NOTES.md)
+- [AI Agent Manifest](developer/AI_AGENT_MANIFEST.md)
+
+## Notes
+
+The project still has open gaps around cloud generation, richer memory workflows, and shell-action review, but the local runtime path is now concrete enough to evolve from.

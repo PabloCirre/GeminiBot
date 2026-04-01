@@ -67,7 +67,7 @@ class GoogleOAuth {
               return;
             }
 
-            res.end('<h1>Authentication successful! You can now close this tab/window and return to Antigravity.</h1><script>window.close()</script>');
+            res.end('<h1>Authentication successful! You can now close this tab/window and return to PIBOT.</h1><script>window.close()</script>');
             server.close();
 
             // Intercambiar código por token

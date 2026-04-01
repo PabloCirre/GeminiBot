@@ -1,0 +1,8 @@
+{
+  "name": "Infinite Codex",
+  "group": "Optimization & Growth",
+  "description": "Continuous, autonomous optimization agent for SEO, performance, and code quality.",
+  "skills": ["infinite_codex_optimization.md"],
+  "cron": "0 0 * * *",
+  "active": true
+}

@@ -1,5 +1,5 @@
 /**
- * GeminiBot UI Mock Simulator
+ * PIBOT UI Mock Simulator
  * Paste this into Electron DevTools (Cmd+Option+I) to test the Shell UI.
  */
 function simulateAgentAction() {

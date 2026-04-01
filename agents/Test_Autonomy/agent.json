@@ -1,0 +1,1 @@
+{"id": "test_autonomy", "name": "Autonomy Tester", "cron": "* * * * *", "folder": "/Users/pablocirre/Desktop/GeminiBot/agents/Test_Autonomy", "group": "System", "prompt": "Crea un archivo llamado success.txt con el texto -AUTONOMY WORKS- usando un comando SHELL."}

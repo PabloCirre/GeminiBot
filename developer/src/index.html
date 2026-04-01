@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PIBOT</title>
+    <!-- UI font + brand font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <header class="app-header drag">
+            <div class="logo-group">
+                <img src="../assets/icon.png" class="app-logo" alt="PIBOT Logo">
+                <h1 class="logo-text">PIBOT</h1>
+            </div>
+            <div class="header-actions">
+                <button id="zen-toggle" class="icon-btn no-drag" title="Zen Mode (Floating Bots)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8M12 14v8M5.6 5.6l5.7 5.7M12.7 12.7l5.7 5.7M2 12h8M14 12h8M5.6 18.4l5.7-5.7M12.7 11.3l5.7-5.7"></path></svg>
+                </button>
+                <!-- 1. Robot (Bots/Agents) -->
+                <button id="agents-toggle" class="icon-btn no-drag" title="Autonomous Agents">
+                    <img src="../assets/icon.png" class="nav-icon-img" alt="Agents">
+                </button>
+                <!-- 2. Folder (Projects Dashboard) -->
+                <button id="projects-toggle" class="icon-btn no-drag" title="Project Contexts">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </button>
+                <!-- 3. Gear (General Settings) -->
+                <button id="settings-toggle" class="icon-btn no-drag" title="System Settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+                <!-- 4. Hide (Power icon) -->
+                <button id="close-app" class="icon-btn no-drag">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FC5FC2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Home: Projects View -->
+        <section id="projects-panel" class="settings-panel no-drag">
+            <div class="panel-section">
+                
+                <!-- Intro Box -->
+                <div class="intro-callout">
+                    <div class="intro-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        Welcome to PIBOT Dashboard
+                    </div>
+                    <p class="intro-text">
+                        PIBOT uses <b>Project Context</b> to understand your logic. Add your codebases below (Antigravity Codex, PyCharm, VS Code projects) to enable specialized agent orchestration.
+                    </p>
+                    <div class="intro-tags">
+                        <span class="intro-tag">JavaScript</span>
+                        <span class="intro-tag">Python</span>
+                        <span class="intro-tag">PHP</span>
+                        <span class="intro-tag">C#</span>
+                        <span class="intro-tag">HTML/CSS</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-header-flex">
+                    <h2 class="section-title" style="margin: 0; font-size: 20px;">Codebase Contexts</h2>
+                    <button id="scan-workspace-btn" class="scan-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        Scan Workspace
+                    </button>
+                </div>
+
+                <div id="projects-list" class="project-grid">
+                    <!-- Project cards injected dynamically -->
+                    <div class="project-card" id="add-project-card">
+                        <div class="project-icon" style="font-size: 30px;">+</div>
+                        <div class="project-name">Add Manually</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Panel -->
+        <section id="settings-panel" class="settings-panel no-drag">
+            <div class="panel-section">
+                <h2 class="section-title">Model Setup</h2>
+
+                <div class="glass-card">
+                    <div class="settings-callout">
+                        <div class="settings-callout-title">How PIBOT models work</div>
+                        <p class="settings-callout-text">
+                            Install models once here, choose a default for new bots, and then give each bot its own model when you create or edit it.
+                        </p>
+                    </div>
+                    <div class="settings-flow-list">
+                        <div class="settings-flow-item">
+                            <span class="settings-flow-step">1</span>
+                            <div>
+                                <div class="settings-flow-title">Connect a runtime</div>
+                                <div class="settings-flow-copy">Choose where PIBOT runs models.</div>
+                            </div>
+                        </div>
+                        <div class="settings-flow-item">
+                            <span class="settings-flow-step">2</span>
+                            <div>
+                                <div class="settings-flow-title">Build your model library</div>
+                                <div class="settings-flow-copy">You can install many models and keep them available.</div>
+                            </div>
+                        </div>
+                        <div class="settings-flow-item">
+                            <span class="settings-flow-step">3</span>
+                            <div>
+                                <div class="settings-flow-title">Assign one model per bot</div>
+                                <div class="settings-flow-copy">Each bot can use a different model from the same library.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label for="provider-select">Where PIBOT runs models</label>
+                        <select id="provider-select">
+                            <option value="google">Google Cloud</option>
+                            <option value="ollama">Ollama Local</option>
+                            <option value="openai-compatible">OpenAI-Compatible Endpoint</option>
+                        </select>
+                    </div>
+                    <div class="provider-status-panel">
+                        <div class="provider-status-row">
+                            <div class="provider-status-main">
+                                <div class="status-dot-pulse" id="connection-pulse"></div>
+                                <span id="connection-status-text" class="provider-status-title">FREE BIRD: Waiting for setup</span>
+                            </div>
+                            <span id="provider-status-badge" class="status-badge warning">Not verified</span>
+                        </div>
+                        <div id="provider-status-detail" class="provider-status-detail">
+                            Start here, then install your models below. Advanced runtime controls stay hidden unless you need them.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card provider-card" id="cloud-provider-card">
+                    <div class="settings-callout">
+                        <div class="settings-callout-title">Cloud credentials</div>
+                        <p class="settings-callout-text">
+                            Hidden by default. Open this only if you want to connect Google Cloud manually.
+                        </p>
+                    </div>
+                    <button id="toggle-cloud-auth-btn" class="btn secondary-btn" type="button">Show cloud credentials</button>
+                    <div id="cloud-auth-controls" class="advanced-provider-controls hidden">
+                        <div class="setting-group">
+                            <label for="client-id">Client ID</label>
+                            <input type="password" id="client-id" placeholder="Paste your Google Client ID...">
+                        </div>
+                        <div class="setting-group">
+                            <label for="client-secret">Client Secret</label>
+                            <input type="password" id="client-secret" placeholder="Paste your Google Client Secret...">
+                        </div>
+                        <button id="oauth-login" class="btn primary-btn">Connect PIBOT API</button>
+                        <div id="auth-status" class="provider-inline-note hidden-note"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card provider-card" id="free-bird-provider-card">
+                    <div class="settings-callout">
+                        <div class="settings-callout-title">FREE BIRD model library</div>
+                        <p class="settings-callout-text">
+                            Install as many local models as you want here. Later, each bot can pick one of them.
+                        </p>
+                    </div>
+                    <div id="model-library-list" class="model-library-list"></div>
+                    <div id="ollama-one-click-panel" class="one-click-panel">
+                        <div class="one-click-header">
+                            <div class="one-click-title">Normal flow: install or remove in 1 click</div>
+                            <div class="one-click-caption">Use this if you want PIBOT to manage Ollama for you. Install adds Ollama plus the selected model. Uninstall removes only that model.</div>
+                        </div>
+                        <div class="one-click-actions">
+                            <button id="install-free-bird-btn" class="btn primary-btn" type="button">1-Click Install FREE BIRD</button>
+                            <button id="uninstall-free-bird-btn" class="btn secondary-btn" type="button">1-Click Uninstall Selected Model</button>
+                        </div>
+                        <div id="one-click-note" class="provider-inline-note">
+                            1-click install installs Ollama if needed and downloads the selected model. 1-click uninstall removes only the selected model and keeps Ollama ready for a fast reinstall.
+                        </div>
+                    </div>
+                    <button id="toggle-advanced-provider-btn" class="btn secondary-btn" type="button">Show advanced runtime options</button>
+                    <div id="advanced-provider-controls" class="advanced-provider-controls hidden">
+                        <div class="setting-group">
+                            <label for="provider-base-url">Runtime Endpoint</label>
+                            <input type="text" id="provider-base-url" placeholder="http://127.0.0.1:11434">
+                        </div>
+                        <div class="setting-group" id="provider-api-key-group">
+                            <label for="provider-api-key">API Key</label>
+                            <input type="password" id="provider-api-key" placeholder="Optional bearer token for self-hosted endpoints">
+                        </div>
+                        <div class="provider-inline-note">Use these only if you need a custom endpoint or manual recovery.</div>
+                        <div class="provider-actions">
+                            <button id="verify-provider-btn" class="btn secondary-btn">Verify Runtime</button>
+                            <button id="refresh-models-btn" class="btn secondary-btn">Refresh Models</button>
+                            <button id="install-ollama-btn" class="btn secondary-btn">Install Ollama Only</button>
+                        </div>
+                        <div class="setting-group">
+                            <label for="install-model-name">Manual Model Manager</label>
+                            <div class="inline-action-row">
+                                <input type="text" id="install-model-name" placeholder="qwen2.5:1.5b">
+                                <button id="install-model-btn" class="btn primary-btn" type="button">Install Model Only</button>
+                                <button id="remove-model-btn" class="btn secondary-btn" type="button">Remove Model Only</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="model-selector-container" class="locked-settings">
+                    <div class="glass-card">
+                        <div class="settings-callout">
+                            <div class="settings-callout-title">Default model for new bots</div>
+                            <p class="settings-callout-text">
+                                This is the model PIBOT preselects when you create a new bot. Existing bots keep their own assigned model.
+                            </p>
+                        </div>
+                        <div class="setting-group">
+                            <label>Default bot model</label>
+                            <input type="hidden" id="model-select" value="qwen2.5:1.5b">
+                            <div id="custom-model-selector" class="custom-selector">
+                                <div id="selected-model-text">qwen2.5:1.5b</div>
+                                <div class="dropdown-icon">▼</div>
+                            </div>
+                            <div id="model-dropdown" class="model-dropdown hidden"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="locked-settings">
+                    <div class="glass-card">
+                        <div class="setting-group">
+                            <label>System Instructions (Global)</label>
+                            <textarea id="system-prompt" rows="3" placeholder="You are a premium AI agent..."></textarea>
+                        </div>
+                        <div class="setting-group">
+                            <input type="hidden" id="project-select" value="none">
+                            <button id="save-settings" class="btn primary-btn">Save Configuration</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <div class="setting-group">
+                        <label>Developer Tools</label>
+                        <button id="init-demo" class="btn secondary-btn">Initialize Demo Agent</button>
+                    </div>
+                </div>
+
+                <button id="select-folder-btn" style="display:none;"></button>
+                <div id="selected-folder-display" style="display:none;"></div>
+
+                <div class="setting-group" style="padding: 10px 0;">
+                    <label>Autonomous Mode</label>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="autonomous-mode">
+                         <span style="font-size: 12px; color: var(--text-secondary);">Full Autonomy (BETA)</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agents Panel -->
+        <section id="agents-panel" class="settings-panel no-drag active">
+            <div class="panel-section">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <button id="back-to-projects-btn" class="icon-btn" title="Back to Projects">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    </button>
+                    <h2 class="section-title" style="margin: 0;">Autonomous Agents</h2>
+                </div>
+                
+                <div id="agents-list" class="agents-grid">
+                    <!-- Agent cards injected here -->
+                </div>
+
+                <!-- 1. Modal for Deploying New Agent (Now hidden by default) -->
+                <div id="deploy-agent-container" class="deploy-section-container">
+                    <div class="modal-header">
+                        <h2 class="section-title" style="margin: 0; color: var(--accent);">Deploy New Agent</h2>
+                        <button id="close-deploy-btn" class="icon-btn no-drag" title="Cancel">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <div class="glass-card">
+                        <div class="setting-group">
+                            <input type="text" id="agent-name" placeholder="Agent Name (e.g. SEO Auditor)">
+                        </div>
+                        <div class="setting-group">
+                            <label for="agent-model">Model for this bot</label>
+                            <select id="agent-model"></select>
+                            <div class="provider-inline-note">Each bot can use a different model. New bots start with the current default.</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <div class="setting-group" style="flex: 1;">
+                                <select id="agent-cron">
+                                    <option value="* * * * *">Every Minute</option>
+                                    <option value="0 * * * *">Every Hour</option>
+                                    <option value="0 9 * * *">Daily 9 AM</option>
+                                </select>
+                            </div>
+                            <div class="setting-group" style="flex: 1;">
+                                <input type="text" id="agent-group" placeholder="Group (e.g. QA)">
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <button id="agent-folder-btn" class="btn secondary-btn">📁 Target Folder</button>
+                            <div id="agent-folder-display" style="font-size: 10px; color: var(--accent);">Target: Not selected</div>
+                            <input type="hidden" id="agent-folder-path">
+                        </div>
+                        <div class="setting-group">
+                            <textarea id="agent-prompt" rows="3" placeholder="Task prompt..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="hidden" id="editing-agent-id">
+                            <button id="add-agent-btn" class="btn primary-btn" style="flex: 1;">Create Agent</button>
+                            <button id="cancel-edit-btn" class="btn" style="display: none;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Modal for Bot Feedback Logs -->
+                <div id="log-popup-container" class="deploy-section-container">
+                    <div class="modal-header">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div id="log-agent-color-icon" style="width: 12px; height: 12px; border-radius: 50%;"></div>
+                            <h2 class="section-title" id="log-agent-name" style="margin: 0; color: var(--text-primary); font-size: 18px;">Bot Feedback</h2>
+                        </div>
+                        <button id="close-log-btn" class="icon-btn no-drag">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <div class="glass-card" style="flex: 1; overflow: hidden; display: flex; flex-direction: column; background: rgba(255,255,255,0.4);">
+                        <div id="log-content-body" style="flex: 1; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; white-space: pre-wrap; padding: 12px; background: rgba(0,0,0,0.03); border-radius: 10px; color: var(--text-primary); line-height: 1.6;">
+                            No logs found for this agent. Click "Wake" to start task.
+                        </div>
+                    </div>
+                </div>
+
+                <button id="toggle-deploy-btn" class="deploy-fab" title="Deploy New Agent">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Execution Monitor Modal -->
+        <div id="execution-monitor" class="execution-monitor">
+            <div class="monitor-header">
+                <h3 id="monitor-agent-name">Agent Activity</h3>
+                <button id="close-monitor-btn" class="icon-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="monitor-content">
+                <div id="monitor-main-instruction" class="monitor-main-instruction">
+                    Analyze the files in your directory and propose actions.
+                </div>
+                <div id="monitor-steps" class="monitor-steps">
+                    <!-- Logs will be injected here -->
+                </div>
+                <div id="monitor-result" class="monitor-result hidden">
+                    <div class="result-header">📜 Proposed Actions / Report</div>
+                    <div id="monitor-result-text" class="result-text"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="zen-overlay" class="zen-overlay">
+            <!-- Floating bots injected here -->
+        </div>
+
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>
